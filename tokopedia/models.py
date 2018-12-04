@@ -120,7 +120,7 @@ class Good(models.Model):
     barang_harga_jual = models.IntegerField(blank = True, null = True, default = 0)
 
     # diskon
-    barang_diskon_harga_asli = models.IntegerField(null = True, blank = True)
+    barang_diskon_harga_asli = models.CharField(max_length = 150, null = True, blank = True)
     barang_diskon_start = models.CharField(max_length = 150, null = True, blank = True)
     barang_diskon_expired = models.CharField(max_length = 150, null = True, blank = True)
     barang_diskon_percentage = models.IntegerField(null = True, blank = True)
