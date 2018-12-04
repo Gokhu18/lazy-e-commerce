@@ -33,9 +33,9 @@ class Shop(models.Model):
 
 
     toko_terjual = models.CharField(max_length = 50, blank = True, null = True)
-    toko_terjual_int = models.CharField(max_length = 50, blank = True, null = True, default = 0)
+    toko_terjual_int = models.IntegerField(blank = True, null = True, default = -1)
     toko_follower = models.CharField(max_length = 50, blank = True, null = True)
-    toko_follower_int = models.CharField(max_length = 50, blank = True, null = True, default = 0)
+    toko_follower_int = models.IntegerField(blank = True, null = True, default = -1)
 
     toko_1_bulan_speed = models.IntegerField(blank = True, null = True)
     toko_1_bulan_order_count = models.IntegerField(blank = True, null = True)
@@ -150,8 +150,9 @@ class Good(models.Model):
     barang_category = models.ForeignKey(Category, on_delete = models.CASCADE, related_name = 'kategori_barang')
     barang_department = models.ForeignKey(Department, on_delete = models.CASCADE, related_name = 'department_barang')
 
-    last_update = models.DateTimeField(blank = True, null = True)
-    last_upload = models.DateTimeField(blank = True, null = True)
+    last_scrapped = models.DateTimeField(blank = True, null = True) # terakhir diambil dr api
+    last_update = models.DateTimeField(blank = True, null = True) # terakhir di edit manual di lokal
+    last_upload = models.DateTimeField(blank = True, null = True) # terakhir di letakkan di web
 
     # todo: mekanisme untuk tahu bahwa dia belum sinkron
     # - ada 2 field
