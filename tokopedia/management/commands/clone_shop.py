@@ -23,8 +23,19 @@ class Command(BaseCommand):
         parser.add_argument('--link',
                             help = 'shop link')
 
+        parser.add_argument('--limit',
+                            help = 'limit good scrapped')
+
     def handle(self, *args, **options):
         self.options = options
+
+        if options['limit']:
+            if isinstance(options['limit'], int):
+                limit = options['limit']
+            else:
+                limit = 10
+        else:
+            limit = None
 
         if options['link']:
             print('Cloning', options['link'])
@@ -33,7 +44,7 @@ class Command(BaseCommand):
             bs4 = BeautifulSoup(html_shop_page, 'html.parser')
 
             shop = self.scrapShop(bs4)
-            self.addGoods(shop, limit = 10)
+            self.addGoods(shop, limit = limit)
             self.scrapGoodsDetail(shop)
 
     def scrapShop(self, bs4Instance):
@@ -79,12 +90,12 @@ class Command(BaseCommand):
             defaults = {
                 'toko_id': shop_id,
                 'toko_nama': html_shop_name.text.strip(),
-                'toko_slogan': html_shop_slogan.text.strip(),
-                'toko_quote': html_shop_quote.text.strip(),
+                'toko_slogan': html_shop_slogan.text.strip() if html_shop_slogan else None,
+                'toko_quote': html_shop_quote.text.strip() if html_shop_quote else None,
                 'toko_gambar': html_shop_profile_image_link,
                 'toko_cover': html_shop_cover_image_link,
 
-                'toko_terjual': html_shop_terjual.text.strip(),
+                'toko_terjual': html_shop_terjual.text.strip() if html_shop_terjual else '0',
                 'toko_follower': html_shop_follower.text.strip(),
 
                 'toko_1_bulan_speed': shop_speed_1['sum_speed'],
@@ -106,7 +117,7 @@ class Command(BaseCommand):
 
         shop_etalase = toped_api.get_shop_etalase(shop_id = shop_id)
         for etalase in shop_etalase:
-            if etalase['id'] == 0:
+            if etalase['id'] < 50:
                 Etalase.objects.update_or_create(
                     toko_induk = shop,
                     etalase_alias = etalase['alias'],
@@ -161,7 +172,8 @@ class Command(BaseCommand):
 
 
         # reputasi tidak usah dicari karena barusaja
-
+        length = len(shop_products)
+        i = 1
         for product in shop_products:
             # buat category dan department
             category, created = Category.objects.update_or_create(
@@ -171,6 +183,8 @@ class Command(BaseCommand):
                     'category_name': product['category_name'],
                 }
             )
+            # print(category.category_name, created)
+
             department, created = Department.objects.update_or_create(
                 id = product['department_id'],
                 defaults = {
@@ -178,10 +192,12 @@ class Command(BaseCommand):
                     'department_name': product['department_name'],
                 }
             )
+            # print(department.department_name, created)
 
             # sudah di scrap good detail
             # good_view = toped_api.get_good_view(product['id'])
             # good_status = toped_api.get_good_stats(product['id'])
+            # print(product)
 
             good, created = Good.objects.update_or_create(
                 id = product['id'],
@@ -221,8 +237,8 @@ class Command(BaseCommand):
                     'barang_rating': product['rating'],
                     'barang_rating_count': product['count_review'],
 
-                    'barang_category': category,
-                    'barang_department': department
+                    'barang_category': category if category else None,
+                    'barang_department': department if department else None
 
                 }
             )
@@ -231,8 +247,9 @@ class Command(BaseCommand):
             # get child/variant? foreach -> make new product
             # for child in product['child']
 
-            print('\tScrapping produk:', product['name'],
+            print('\t[' + str(i) + '/' + str(length) + '] Scrapping produk:', product['name'],
                   '[EDITED]' if not created else '')
+            i += 1
 
     def scrapGoodsDetail(self, shop = None):
         if shop:
@@ -247,8 +264,10 @@ class Command(BaseCommand):
             if len(unfinished_goods) == 0:
                 unfinished_goods = Good.objects.all()
 
+        length = len(unfinished_goods)
+        i = 1
         for good in unfinished_goods:
-            print('\tScrapping detail of', good.barang_nama)
+            print('\t[' + str(i) + '/' + str(length) + '] Scrapping detail of', good.barang_nama)
             html_shop_page = toped_api.get_good_page(good.barang_url)
 
             instance = BeautifulSoup(html_shop_page, 'html.parser')
@@ -286,3 +305,4 @@ class Command(BaseCommand):
             good.barang_informasi_produk = item_summary
 
             good.save()
+            i += 1
