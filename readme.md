@@ -1,11 +1,17 @@
 # lazycommerce 
 Automate easy money.
 
-## Running
-```
-python3 manage.py migrate
-python3 manage.py runserver
+## Getting started
+- Running
   ```
+  python3 manage.py migrate
+  python3 manage.py runserver
+  ```
+- Cloning shop
+  - Tokopedia
+    ```
+    python3 manage.py clone_shop --link https://www.tokopedia.com/laris88
+    ```
 
 ## features
 - clone shop
