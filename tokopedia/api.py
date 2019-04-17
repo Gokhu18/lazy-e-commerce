@@ -11,7 +11,6 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
 }
 
-
 def get_shop_page(link, full_return = False):
     try:
         shop_request = requests.get(link, headers = headers, timeout = 20)
@@ -137,19 +136,39 @@ def get_shop_products(shop_id, header = False, full_return = False):
     output = data['data']['products']
 
     if not header:
+
+        main_list = []
+        while len(main_list) < total_data:
+            params['start'] = params['rows']
+            params['rows'] += 200
+
+            try:
+                shop_product_request = requests.get(api_link,headers = headers,
+                                                  params = params, timeout = 20)
+            except Exception as e:
+                print('get_shop_note:', str(e))
+
+            assert shop_product_request.status_code == 200
+            data = json.loads(shop_product_request.text)
+
+            main_list += data['data']['products']
+            print('\tObtaining ' + str(len(main_list)) + ' of ' + str(total_data))
+
+        output = main_list
+
         # get full products
-        params['rows'] = total_data
-        try:
-            shop_product_request = requests.get(api_link,headers = headers,
-                                              params = params, timeout = 20)
-        except Exception as e:
-            print('get_shop_note:', str(e))
-
-        assert shop_product_request.status_code == 200
-        data = json.loads(shop_product_request.text)
-
-        total_data = data['header']['total_data']
-        output = data['data']['products']
+        # params['rows'] = total_data
+        # try:
+        #     shop_product_request = requests.get(api_link,headers = headers,
+        #                                       params = params, timeout = 20)
+        # except Exception as e:
+        #     print('get_shop_note:', str(e))
+        #
+        # assert shop_product_request.status_code == 200
+        # data = json.loads(shop_product_request.text)
+        #
+        # total_data = data['header']['total_data']
+        # output = data['data']['products']
 
     if full_return:
         return shop_product_request, output, total_data
@@ -192,7 +211,7 @@ def get_good_stats(product_id, full_return =False):
         return goods_stats_request, output
     return output
 
-# todo
+# todo mengambil dan mengolah variasi goods
 def get_good_variant():
     # childnya siapa aja, dsb
     api_link_old = 'https://tome.tokopedia.com/v2/product/359200106/variant'

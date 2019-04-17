@@ -104,7 +104,7 @@ class Command(BaseCommand):
             i += 1
 
 
-    # todo: test
+    # todo: make unitest
     def scrap_goods_detail(self):
         unfinished_goods = Good.objects.filter(informasi_produk = None)
         goods_amount = len(unfinished_goods)

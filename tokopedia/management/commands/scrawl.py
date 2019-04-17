@@ -19,3 +19,6 @@ class Command(BaseCommand):
         # penting: mungkin malah ada API untuk ambil flash sale / shop terbaik, dsb
 
         pass
+
+
+    # todo: otomatis tambahkan flash sale ke shopee

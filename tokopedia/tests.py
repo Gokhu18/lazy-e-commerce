@@ -2,14 +2,30 @@ from django.test import TestCase
 from bs4 import BeautifulSoup
 import tokopedia.api as toped_api
 import json
+from tokopedia.models import Shop, Good
 
 cookies = ''
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
+shop_id = [
+    179008,  # laris88
+    350346, #armiashop
+]
+
+good_id = [
+
+]
+
 
 # Create your tests here.
 class APITest(TestCase):
+
+
+    def setUp(self):
+        super().setUp()
+        self.shop_queryset = Shop.objects.filter()[:5]
+
     def test_get_shop_page(self):
         result = toped_api.get_shop_page('https://www.tokopedia.com/armiashop', full_return = True)
         self.assertIsNotNone(result)
@@ -98,7 +114,9 @@ class APITest(TestCase):
             self.assertTrue(isinstance(output['order_count'], int))
 
     def test_get_shop_products(self):
-        result, products, total_data = toped_api.get_shop_products(shop_id = 350346, header = True, full_return = True)
+
+
+        result, products, total_data = toped_api.get_shop_products(shop_id = shop_id, header = True, full_return = True)
         self.assertIsNotNone(result)
         self.assertTrue(isinstance(result.status_code, int))
         self.assertEqual(result.status_code, 200)
@@ -166,7 +184,7 @@ class APITest(TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIsNotNone(result.text)
 
-        self.assertTrue(isinstance(output, int))
+        self.assertTrue(isinstance(output, str))
 
     def test_get_good_stats(self):
         result, output = toped_api.get_good_stats(359200081, full_return = True)
